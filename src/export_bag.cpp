@@ -89,6 +89,11 @@ namespace exportbag {
     stream << outputDir_ << "/";
     stream << topicNames_.at(topic) << "/data/";
     stream << std::setfill('0') << std::setw(8) << count << ".jpg";
+    
+    //Timestamp
+    std::ofstream timestamp;
+    timestamp.open(outputDir_+"/"+topicNames_.at(topic)+"/timestamps.txt", std::ios_base::app);
+    timestamp << img->header.stamp << std::endl;
 
     ROS_INFO_STREAM(stream.str());
 

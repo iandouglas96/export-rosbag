@@ -13,7 +13,6 @@
 #include <opencv2/imgcodecs.hpp>
 #include <vector>
 #include <string>
-#include <iostream>
 #include <sys/stat.h> //Filesystem unix lib
 
 namespace exportbag {
