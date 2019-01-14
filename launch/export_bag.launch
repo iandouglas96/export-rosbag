@@ -5,5 +5,8 @@
     <rosparam param="image_topics">
       ["/quadruple/bottom_left/image_raw/compressed"]
     </rosparam>
+    <rosparam param="pointcloud_topics">
+      ["/velodyne_point_cloud"]
+    </rosparam>
   </node>
 </launch>

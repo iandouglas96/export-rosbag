@@ -75,6 +75,16 @@ namespace exportbag {
       mkdir((outputDir_+"/"+dir+"/data").c_str(), 0777);
       n++;
     }
+   
+    n = 0; 
+    for (auto &topic : pointcloudTopics_) {
+      dir = "pointcloud"+std::to_string(n);
+      topicNames_.insert(topicNames_.begin(), std::pair<std::string, std::string>(
+            topic, dir));
+      mkdir((outputDir_+"/"+dir).c_str(), 0777);
+      mkdir((outputDir_+"/"+dir+"/data").c_str(), 0777);
+      n++;
+    } 
   }
 
   void ExportBag::processImage(const std::string &topic,
