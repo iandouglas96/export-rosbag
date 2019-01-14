@@ -13,6 +13,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <vector>
 #include <string>
+#include <iostream>
+#include <sys/stat.h> //Filesystem unix lib
 
 namespace exportbag {
   class ExportBag {
@@ -23,6 +25,7 @@ namespace exportbag {
     bool initialize();
   private:
     void processBag();
+    void createDirectories();
     void processImage(const std::string &topic, const sensor_msgs::CompressedImageConstPtr &img);
 
     ros::NodeHandle nh_;

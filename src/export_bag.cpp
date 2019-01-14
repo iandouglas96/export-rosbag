@@ -42,13 +42,7 @@ namespace exportbag {
     allTopics.insert(allTopics.end(), pointcloudTopics_.begin(), pointcloudTopics_.end());
     allTopics.insert(allTopics.end(), imuTopic_);
 
-    //Name folders
-    int n = 0;
-    for (auto &topic : imageTopics_) {
-      topicNames_.insert(topicNames_.begin(), std::pair<std::string, std::string>(
-            topic, "image"+std::to_string(n)));
-      n++;
-    }
+    createDirectories();
 
     //Init counts to 0
     for (auto &topic : allTopics) {
@@ -69,7 +63,22 @@ namespace exportbag {
     } 
   }
 
-  void ExportBag::processImage(const std::string &topic, const sensor_msgs::CompressedImageConstPtr &img) {
+  void ExportBag::createDirectories() {
+    //Name folders
+    int n = 0;
+    std::string dir;
+    for (auto &topic : imageTopics_) {
+      dir = "image"+std::to_string(n);
+      topicNames_.insert(topicNames_.begin(), std::pair<std::string, std::string>(
+            topic, dir));
+      mkdir((outputDir_+"/"+dir).c_str(), 0777);
+      mkdir((outputDir_+"/"+dir+"/data").c_str(), 0777);
+      n++;
+    }
+  }
+
+  void ExportBag::processImage(const std::string &topic,
+      const sensor_msgs::CompressedImageConstPtr &img) {
     cv::Mat origImage = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8)->image; 
     cv::Mat colorImage;
     //Debayer
@@ -78,7 +87,7 @@ namespace exportbag {
     int count = topicCounts_.at(topic);
     std::ostringstream stream;
     stream << outputDir_ << "/";
-    stream << topicNames_.at(topic) << "/";
+    stream << topicNames_.at(topic) << "/data/";
     stream << std::setfill('0') << std::setw(8) << count << ".jpg";
 
     ROS_INFO_STREAM(stream.str());
