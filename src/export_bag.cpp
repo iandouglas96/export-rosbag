@@ -17,7 +17,7 @@ namespace exportbag {
 
   bool ExportBag::initialize() {
     nh_.getParam("image_topics", imageTopics_);
-    nh_.getParam("pointcloud_topics", pointcloudTopics_);
+    nh_.getParam("pointcloud_topics", pointCloudTopics_);
     nh_.getParam("imu_topic", imuTopic_);
 
     if (!nh_.getParam("bag_file", bagFile_)) {
@@ -39,7 +39,7 @@ namespace exportbag {
     ROS_INFO_STREAM("loading bag file: " << bagFile_);
 
     std::vector<std::string> allTopics = imageTopics_;
-    allTopics.insert(allTopics.end(), pointcloudTopics_.begin(), pointcloudTopics_.end());
+    allTopics.insert(allTopics.end(), pointCloudTopics_.begin(), pointCloudTopics_.end());
     allTopics.insert(allTopics.end(), imuTopic_);
 
     createDirectories();
@@ -63,12 +63,16 @@ namespace exportbag {
         const sensor_msgs::PointCloud2ConstPtr pc = 
           m.instantiate<sensor_msgs::PointCloud2>();
         processPointCloud(m.getTopic(), pc);
+      } else if (m.getDataType() == "sensor_msgs/Imu") {
+        const sensor_msgs::ImuConstPtr imu = 
+          m.instantiate<sensor_msgs::Imu>();
+        processImu(imu);
       }
     } 
   }
 
   void ExportBag::createDirectories() {
-    //Name folders
+    //name folders
     int n = 0;
     std::string dir;
     for (auto &topic : imageTopics_) {
@@ -81,21 +85,23 @@ namespace exportbag {
     }
    
     n = 0; 
-    for (auto &topic : pointcloudTopics_) {
+    for (auto &topic : pointCloudTopics_) {
       dir = "pointcloud"+std::to_string(n);
       topicNames_.insert(topicNames_.begin(), std::pair<std::string, std::string>(
             topic, dir));
       mkdir((outputDir_+"/"+dir).c_str(), 0777);
       mkdir((outputDir_+"/"+dir+"/data").c_str(), 0777);
       n++;
-    } 
+    }
+
+    mkdir((outputDir_+"/imu").c_str(), 0777); 
   }
 
   void ExportBag::processImage(const std::string &topic,
       const sensor_msgs::CompressedImageConstPtr &img) {
     cv::Mat origImage = cv_bridge::toCvCopy(img, sensor_msgs::image_encodings::MONO8)->image; 
     cv::Mat colorImage;
-    //Debayer
+    //debayer
     cv::cvtColor(origImage, colorImage, cv::COLOR_BayerBG2BGR);
 
     int count = topicCounts_.at(topic);
@@ -104,7 +110,7 @@ namespace exportbag {
     stream << topicNames_.at(topic) << "/data/";
     stream << std::setfill('0') << std::setw(8) << count << ".jpg";
     
-    //Timestamp
+    //timestamp
     std::ofstream timestamp;
     timestamp.open(outputDir_+"/"+topicNames_.at(topic)+"/timestamps.txt", std::ios_base::app);
     timestamp << img->header.stamp << std::endl;
@@ -118,7 +124,7 @@ namespace exportbag {
 
   void ExportBag::processPointCloud(const std::string &topic,
       const sensor_msgs::PointCloud2ConstPtr &pc) {
-    //Convert to PCL
+    //convert to pcl
     pcl::PointCloud<pcl::PointXYZI> pcl_pc;
     pcl::fromROSMsg<pcl::PointXYZI>(*pc, pcl_pc);
 
@@ -128,7 +134,7 @@ namespace exportbag {
     stream << topicNames_.at(topic) << "/data/";
     stream << std::setfill('0') << std::setw(8) << count << ".pcd";
     
-    //Timestamp
+    //timestamp
     std::ofstream timestamp;
     timestamp.open(outputDir_+"/"+topicNames_.at(topic)+"/timestamps.txt", std::ios_base::app);
     timestamp << pc->header.stamp << std::endl;
@@ -138,5 +144,17 @@ namespace exportbag {
     pcl::io::savePCDFileASCII(stream.str(), pcl_pc);
 
     topicCounts_.at(topic) = count + 1;
+  }
+
+  void ExportBag::processImu(const sensor_msgs::ImuConstPtr &imu) {
+    std::ofstream imu_file;
+    imu_file.open(outputDir_+"/imu/imu.txt", std::ios_base::app);
+    imu_file << imu->orientation.x << "," << imu->orientation.y << 
+      "," << imu->orientation.z << "," << imu->orientation.w << ",";
+    imu_file << imu->angular_velocity.x << "," << imu->angular_velocity.y << 
+      "," << imu->angular_velocity.z << ",";
+    imu_file << imu->linear_acceleration.x << "," << imu->linear_acceleration.y <<
+      "," << imu->linear_acceleration.z << ",";
+    imu_file << imu->header.stamp << std::endl;
   }
 }

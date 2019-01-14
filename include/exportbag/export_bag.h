@@ -30,6 +30,7 @@ namespace exportbag {
     void createDirectories();
     void processImage(const std::string &topic, const sensor_msgs::CompressedImageConstPtr &img);
     void processPointCloud(const std::string &topic, const sensor_msgs::PointCloud2ConstPtr &pc);
+    void processImu(const sensor_msgs::ImuConstPtr &imu);
 
     ros::NodeHandle nh_;
 
@@ -38,7 +39,7 @@ namespace exportbag {
 
     //params
     std::vector<std::string> imageTopics_;
-    std::vector<std::string> pointcloudTopics_;
+    std::vector<std::string> pointCloudTopics_;
     std::string imuTopic_;
     std::string bagFile_;
     std::string outputDir_; 
