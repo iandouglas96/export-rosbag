@@ -14,6 +14,9 @@
 #include <vector>
 #include <string>
 #include <sys/stat.h> //Filesystem unix lib
+#include <pcl_conversions/pcl_conversions.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/point_types.h>
 
 namespace exportbag {
   class ExportBag {
@@ -26,6 +29,7 @@ namespace exportbag {
     void processBag();
     void createDirectories();
     void processImage(const std::string &topic, const sensor_msgs::CompressedImageConstPtr &img);
+    void processPointCloud(const std::string &topic, const sensor_msgs::PointCloud2ConstPtr &pc);
 
     ros::NodeHandle nh_;
 

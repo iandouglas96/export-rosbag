@@ -59,6 +59,10 @@ namespace exportbag {
         const sensor_msgs::CompressedImageConstPtr img = 
           m.instantiate<sensor_msgs::CompressedImage>();
         processImage(m.getTopic(), img);
+      } else if (m.getDataType() == "sensor_msgs/PointCloud2") {
+        const sensor_msgs::PointCloud2ConstPtr pc = 
+          m.instantiate<sensor_msgs::PointCloud2>();
+        processPointCloud(m.getTopic(), pc);
       }
     } 
   }
@@ -108,6 +112,30 @@ namespace exportbag {
     ROS_INFO_STREAM(stream.str());
 
     cv::imwrite(stream.str(), colorImage);
+
+    topicCounts_.at(topic) = count + 1;
+  }
+
+  void ExportBag::processPointCloud(const std::string &topic,
+      const sensor_msgs::PointCloud2ConstPtr &pc) {
+    //Convert to PCL
+    pcl::PointCloud<pcl::PointXYZI> pcl_pc;
+    pcl::fromROSMsg<pcl::PointXYZI>(*pc, pcl_pc);
+
+    int count = topicCounts_.at(topic);
+    std::ostringstream stream;
+    stream << outputDir_ << "/";
+    stream << topicNames_.at(topic) << "/data/";
+    stream << std::setfill('0') << std::setw(8) << count << ".pcd";
+    
+    //Timestamp
+    std::ofstream timestamp;
+    timestamp.open(outputDir_+"/"+topicNames_.at(topic)+"/timestamps.txt", std::ios_base::app);
+    timestamp << pc->header.stamp << std::endl;
+
+    ROS_INFO_STREAM(stream.str());
+
+    pcl::io::savePCDFileASCII(stream.str(), pcl_pc);
 
     topicCounts_.at(topic) = count + 1;
   }
