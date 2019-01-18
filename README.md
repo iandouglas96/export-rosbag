@@ -4,7 +4,7 @@ Utility to export a rosbag into a directory structure similar to KITTI.
 
 ## Dependencies
 
-I have only tested with ROS Melodic and Ubuntu 18.04, though it will likely work with earlier versions as well.  Aside from the ROS dependencies, OpenCV and PCL are both also required, to handle images and pointclouds, respectively.
+I have only tested with ROS Melodic and Ubuntu 18.04, though it will likely work with earlier versions as well.  Aside from the ROS dependencies, OpenCV and PCL are both also required, to handle images and pointclouds, respectively.  `flex_sync` is needed for synchronization, and can be found [here](https://github.com/daniilidis-group/flex_sync)
 
 ## Usage
 
