@@ -20,6 +20,7 @@ namespace exportbag {
     nh_.getParam("pointcloud_topics", pointCloudTopics_);
     nh_.getParam("imu_topic", imuTopic_);
     nh_.getParam("sync_images", syncImages_);
+    nh_.getParam("sync_lidar_with_images", syncLidarWithImages_);
 
     if (!nh_.getParam("bag_file", bagFile_)) {
       ROS_ERROR("Must specify bag to process (bag_file)!");
@@ -72,7 +73,10 @@ namespace exportbag {
       } else if (m.getDataType() == "sensor_msgs/PointCloud2") {
         const sensor_msgs::PointCloud2ConstPtr pc = 
           m.instantiate<sensor_msgs::PointCloud2>();
-        processPointCloud(m.getTopic(), pc);
+        if (syncLidarWithImages_ && syncImages_)
+          lastPointCloud_ = pc;
+        else
+          processPointCloud(m.getTopic(), pc);
       } else if (m.getDataType() == "sensor_msgs/Imu") {
         const sensor_msgs::ImuConstPtr imu = 
           m.instantiate<sensor_msgs::Imu>();
@@ -112,6 +116,9 @@ namespace exportbag {
     for (const auto img : img_vec) {
       processImage(imageTopics_[i++], img);
     }
+
+    if (lastPointCloud_ != NULL && syncImages_ && syncLidarWithImages_)
+      processPointCloud(pointCloudTopics_[0], lastPointCloud_);
   }
 
   void ExportBag::processImage(const std::string &topic,

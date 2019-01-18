@@ -14,6 +14,10 @@ All configuration is done in `launch/export_bag.launch`.  Provide the path to th
 
 Finally, run `roslaunch export_bag export_bag.launch` to run the export.  It may take a while.
 
+## Synchronization
+
+2 sync options are available in `export_bag.launch`.  `sync_images` synchronizes images, assuming that they have been hardware synchronized (all have the same timestamp).  `sync_lidar_with_images` only works if `sync_images` is set, and synchronizes each set of images to the most recent pointcloud.  It will also only work with a single pointcloud topic.
+
 ## Output file structure
 
 The output file structure will be created automatically.  Each topic will be mapped to a folder (i.e. image2, pointcloud0).  Each folder has a data subfolder with the sequential exported data (.jpg for images, .pcd (PCL Pointcloud) for pointclouds).  A `timestamps.txt` file gives the time each image was logged in seconds since epoch.
@@ -24,5 +28,4 @@ IMU data is logged somewhat differently to `imu.txt`.  This is essentially a csv
 
 - Option to rectify images
 - Option to filter images (CLAHE)
-- Option to synchronize images and pointclouds
 - Export pointclouds to KITTI format

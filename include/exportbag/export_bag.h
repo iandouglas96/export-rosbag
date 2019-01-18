@@ -39,6 +39,8 @@ namespace exportbag {
     std::map<std::string, int> topicCounts_;
     std::map<std::string, std::string> topicNames_;
 
+    sensor_msgs::PointCloud2ConstPtr lastPointCloud_;
+
     //params
     std::vector<std::string> imageTopics_;
     std::vector<std::string> pointCloudTopics_;
@@ -46,6 +48,7 @@ namespace exportbag {
     std::string bagFile_;
     std::string outputDir_;
     bool syncImages_;
+    bool syncLidarWithImages_;
   };
 }
 
