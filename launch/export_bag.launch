@@ -3,6 +3,7 @@
     <param name="bag_file" value="/media/ian/ResearchSSD/InspectionData/tunnel_datasets/CHD/inspot_2017-02-09-13-50-52.bag"/> 
     <param name="output_dir" value="/home/ian/tmp"/>
     <param name="imu_topic" value="/mavros/imu/data"/>
+    <param name="sync_images" value="true"/>
     <rosparam param="image_topics">
       ["/quadruple/bottom_left/image_raw/compressed",
        "/quadruple/bottom_right/image_raw/compressed",

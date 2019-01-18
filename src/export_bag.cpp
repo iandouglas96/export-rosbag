@@ -19,6 +19,7 @@ namespace exportbag {
     nh_.getParam("image_topics", imageTopics_);
     nh_.getParam("pointcloud_topics", pointCloudTopics_);
     nh_.getParam("imu_topic", imuTopic_);
+    nh_.getParam("sync_images", syncImages_);
 
     if (!nh_.getParam("bag_file", bagFile_)) {
       ROS_ERROR("Must specify bag to process (bag_file)!");
@@ -37,18 +38,24 @@ namespace exportbag {
     rosbag::Bag bag;
     bag.open(bagFile_, rosbag::bagmode::Read);
     ROS_INFO_STREAM("loading bag file: " << bagFile_);
+    
+    createDirectories();
 
     std::vector<std::string> allTopics = imageTopics_;
     allTopics.insert(allTopics.end(), pointCloudTopics_.begin(), pointCloudTopics_.end());
     allTopics.insert(allTopics.end(), imuTopic_);
-
-    createDirectories();
-
+    
     //Init counts to 0
     for (auto &topic : allTopics) {
       topicCounts_.insert(topicCounts_.begin(), std::pair<std::string, int>(topic, 0));
     }
-
+    
+    //setup sync
+    std::vector<std::vector<std::string>> sync_topics;
+    sync_topics.push_back(imageTopics_);
+    flex_sync::Sync<sensor_msgs::CompressedImage> image_sync(
+         sync_topics, std::bind(&ExportBag::processSyncImages, this, std::placeholders::_1));
+    
     rosbag::View view(bag, rosbag::TopicQuery(allTopics), rosbag::View(bag).getBeginTime(),
         ros::TIME_MAX);
 
@@ -58,7 +65,10 @@ namespace exportbag {
       if (m.getDataType() == "sensor_msgs/CompressedImage") {
         const sensor_msgs::CompressedImageConstPtr img = 
           m.instantiate<sensor_msgs::CompressedImage>();
-        processImage(m.getTopic(), img);
+        if (syncImages_) {
+          image_sync.process(m.getTopic(), img);
+        } else
+          processImage(m.getTopic(), img);
       } else if (m.getDataType() == "sensor_msgs/PointCloud2") {
         const sensor_msgs::PointCloud2ConstPtr pc = 
           m.instantiate<sensor_msgs::PointCloud2>();
@@ -68,7 +78,7 @@ namespace exportbag {
           m.instantiate<sensor_msgs::Imu>();
         processImu(imu);
       }
-    } 
+    }
   }
 
   void ExportBag::createDirectories() {
@@ -95,6 +105,13 @@ namespace exportbag {
     }
 
     mkdir((outputDir_+"/imu").c_str(), 0777); 
+  }
+
+  void ExportBag::processSyncImages(const std::vector<sensor_msgs::CompressedImageConstPtr> &img_vec) {
+    int i=0;
+    for (const auto img : img_vec) {
+      processImage(imageTopics_[i++], img);
+    }
   }
 
   void ExportBag::processImage(const std::string &topic,

@@ -17,6 +17,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <flex_sync/sync.h>
 
 namespace exportbag {
   class ExportBag {
@@ -28,6 +29,7 @@ namespace exportbag {
   private:
     void processBag();
     void createDirectories();
+    void processSyncImages(const std::vector<sensor_msgs::CompressedImageConstPtr> &img_vec);
     void processImage(const std::string &topic, const sensor_msgs::CompressedImageConstPtr &img);
     void processPointCloud(const std::string &topic, const sensor_msgs::PointCloud2ConstPtr &pc);
     void processImu(const sensor_msgs::ImuConstPtr &imu);
@@ -42,7 +44,8 @@ namespace exportbag {
     std::vector<std::string> pointCloudTopics_;
     std::string imuTopic_;
     std::string bagFile_;
-    std::string outputDir_; 
+    std::string outputDir_;
+    bool syncImages_;
   };
 }
 

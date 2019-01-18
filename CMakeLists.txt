@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   cv_bridge
   pcl_conversions
+  flex_sync
 )
 
 catkin_package(
