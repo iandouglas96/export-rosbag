@@ -49,6 +49,9 @@ namespace exportbag {
     std::string outputDir_;
     bool syncImages_;
     bool syncLidarWithImages_;
+
+    bool useCLAHE_;
+    cv::Ptr<cv::CLAHE> clahe_;
   };
 }
 

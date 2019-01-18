@@ -12,6 +12,8 @@ export-rosbag is built as a ROS node.  If all dependencies are in order, just cr
 
 All configuration is done in `launch/export_bag.launch`.  Provide the path to the relevant bag file, as well as the various topics you would like to export.  Currently images, pointclouds, and imu data are supported.  Multiple images and pointclouds can be exported simultaneously.  Additionally, make sure that you provide a path to an empty folder to export to.
 
+export-rosbag is additionally capable of doing some post-processing on images.  `use_clahe` enables the openCV CLAHE filter, subject to `clahe_clip_limit` and `clahe_tile_size`.  CLAHE effectively does a histogram equalization across the image to normalize brightness and contrast.
+
 Finally, run `roslaunch export_bag export_bag.launch` to run the export.  It may take a while.
 
 ## Synchronization

@@ -5,6 +5,9 @@
     <param name="imu_topic" value="/mavros/imu/data"/>
     <param name="sync_images" value="true"/>
     <param name="sync_lidar_with_images" value="true"/>
+    <param name="use_clahe" value="true"/>
+    <param name="clahe_clip_limit" value="2.5"/>
+    <param name="clahe_tile_count" value="8"/>
     <rosparam param="image_topics">
       ["/quadruple/bottom_left/image_raw/compressed",
        "/quadruple/bottom_right/image_raw/compressed",

@@ -21,6 +21,16 @@ namespace exportbag {
     nh_.getParam("imu_topic", imuTopic_);
     nh_.getParam("sync_images", syncImages_);
     nh_.getParam("sync_lidar_with_images", syncLidarWithImages_);
+    
+    nh_.getParam("use_clahe", useCLAHE_);
+    float claheClipLimit;
+    float claheTileCount;
+    nh_.getParam("clahe_clip_limit", claheClipLimit);
+    nh_.getParam("clahe_tile_count", claheTileCount);
+
+    clahe_ = cv::createCLAHE();
+    clahe_->setClipLimit(claheClipLimit);
+    clahe_->setTilesGridSize(cv::Size(claheTileCount, claheTileCount));
 
     if (!nh_.getParam("bag_file", bagFile_)) {
       ROS_ERROR("Must specify bag to process (bag_file)!");
@@ -127,6 +137,18 @@ namespace exportbag {
     cv::Mat colorImage;
     //debayer
     cv::cvtColor(origImage, colorImage, cv::COLOR_BayerBG2BGR);
+
+    if (useCLAHE_) {
+      //convert to ycb, split up channels
+      cv::Mat ycbImage;
+      cv::cvtColor(colorImage, ycbImage, cv::COLOR_BGR2YCrCb);
+      std::vector<cv::Mat> ycbChannels(3);
+      cv::split(ycbImage, ycbChannels);
+      //CLAHE on intensity channel
+      clahe_->apply(ycbChannels[0], ycbChannels[0]);
+      cv::merge(ycbChannels, ycbImage);
+      cv::cvtColor(ycbImage, colorImage, cv::COLOR_YCrCb2BGR);
+    }
 
     int count = topicCounts_.at(topic);
     std::ostringstream stream;
