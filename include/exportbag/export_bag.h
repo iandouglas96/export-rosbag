@@ -11,6 +11,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 #include <vector>
 #include <string>
 #include <sys/stat.h> //Filesystem unix lib
@@ -18,6 +19,7 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <flex_sync/sync.h>
+#include <yaml-cpp/yaml.h>
 
 namespace exportbag {
   class ExportBag {
@@ -33,11 +35,15 @@ namespace exportbag {
     void processImage(const std::string &topic, const sensor_msgs::CompressedImageConstPtr &img);
     void processPointCloud(const std::string &topic, const sensor_msgs::PointCloud2ConstPtr &pc);
     void processImu(const sensor_msgs::ImuConstPtr &imu);
+    void rectifyImage(cv::Mat &in, cv::Mat& out, const std::string& cam);
+    void initRectifyMaps(const std::string &rectify_path);
 
     ros::NodeHandle nh_;
 
     std::map<std::string, int> topicCounts_;
     std::map<std::string, std::string> topicNames_;
+    std::map<std::string, cv::Mat> rectifyMap1_;
+    std::map<std::string, cv::Mat> rectifyMap2_;
 
     sensor_msgs::PointCloud2ConstPtr lastPointCloud_;
 
@@ -51,6 +57,7 @@ namespace exportbag {
     bool syncLidarWithImages_;
 
     bool useCLAHE_;
+    bool rectify_;
     cv::Ptr<cv::CLAHE> clahe_;
   };
 }

@@ -1,6 +1,6 @@
 <launch>
   <node name="export_bag_node" type="export_bag" pkg="export_bag" output="screen">
-    <param name="bag_file" value="/media/ian/ResearchSSD/InspectionData/tunnel_datasets/CHD/inspot_2017-02-09-13-50-52.bag"/> 
+    <param name="bag_file" value="/media/ian/ResearchSSD/InspectionData/tunnel_datasets/CHD/tagslam_data/2018-08-01-15-27-11/tag_detections.bag"/> 
     <param name="output_dir" value="/home/ian/tmp"/>
     <param name="imu_topic" value="/mavros/imu/data"/>
     <param name="sync_images" value="true"/>
@@ -8,6 +8,8 @@
     <param name="use_clahe" value="true"/>
     <param name="clahe_clip_limit" value="2.5"/>
     <param name="clahe_tile_count" value="8"/>
+    <param name="rectify" value="true"/>
+    <param name="rectify_path" value="/home/ian/catkin_ws/src/inspection/apriltags/dam/current/config/cameras.yaml"/>
     <rosparam param="image_topics">
       ["/quadruple/bottom_left/image_raw/compressed",
        "/quadruple/bottom_right/image_raw/compressed",

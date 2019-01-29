@@ -29,5 +29,4 @@ IMU data is logged somewhat differently to `imu.txt`.  This is essentially a csv
 ## TODO
 
 - Option to rectify images
-- Option to filter images (CLAHE)
 - Export pointclouds to KITTI format

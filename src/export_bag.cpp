@@ -27,6 +27,13 @@ namespace exportbag {
     float claheTileCount;
     nh_.getParam("clahe_clip_limit", claheClipLimit);
     nh_.getParam("clahe_tile_count", claheTileCount);
+    
+    nh_.getParam("rectify", rectify_);
+    if (rectify_) {
+      std::string rectifyPath;
+      nh_.getParam("rectify_path", rectifyPath);
+      initRectifyMaps(rectifyPath);
+    }
 
     clahe_ = cv::createCLAHE();
     clahe_->setClipLimit(claheClipLimit);
@@ -150,6 +157,10 @@ namespace exportbag {
       cv::cvtColor(ycbImage, colorImage, cv::COLOR_YCrCb2BGR);
     }
 
+    if (rectify_) {
+      rectifyImage(colorImage, colorImage, topic);
+    }
+
     int count = topicCounts_.at(topic);
     std::ostringstream stream;
     stream << outputDir_ << "/";
@@ -168,6 +179,38 @@ namespace exportbag {
     topicCounts_.at(topic) = count + 1;
   }
 
+  void ExportBag::initRectifyMaps(const std::string &rectify_path) {
+    YAML::Node trans_yaml = YAML::LoadFile(rectify_path);
+    for (std::size_t i=0; i<imageTopics_.size(); i++) {
+      std::string topic = "cam"+std::to_string(i);
+      cv::Mat K = cv::Mat(3, 3, CV_64F, cv::Scalar(0));
+      K.at<double>(0, 0) = trans_yaml[topic]["intrinsics"][0].as<double>();   
+      K.at<double>(1, 1) = trans_yaml[topic]["intrinsics"][1].as<double>();   
+      K.at<double>(0, 2) = trans_yaml[topic]["intrinsics"][2].as<double>();   
+      K.at<double>(1, 2) = trans_yaml[topic]["intrinsics"][3].as<double>();   
+      K.at<double>(2, 2) = 1;
+
+      cv::Mat distCoeffs = cv::Mat(4, 1, CV_64F, cv::Scalar(0));
+      for (int j=0; j<4; j++)
+        distCoeffs.at<double>(j, 0) = trans_yaml[topic]["distortion_coeffs"][j].as<double>(); 
+
+      cv::Size size;
+      size.width = trans_yaml[topic]["resolution"][0].as<double>();
+      size.height = trans_yaml[topic]["resolution"][1].as<double>();
+
+      cv::Mat map1, map2;
+      cv::fisheye::initUndistortRectifyMap(K, distCoeffs, cv::Mat(), K, size,
+          CV_16SC2, map1, map2);
+
+      rectifyMap1_[imageTopics_[i]] = map1;
+      rectifyMap2_[imageTopics_[i]] = map2;
+    }
+  }
+
+  void ExportBag::rectifyImage(cv::Mat &in, cv::Mat &out, const std::string& cam) {
+    cv::remap(in, out, rectifyMap1_[cam], rectifyMap2_[cam], cv::INTER_LINEAR);
+  }
+
   void ExportBag::processPointCloud(const std::string &topic,
       const sensor_msgs::PointCloud2ConstPtr &pc) {
     //convert to pcl
@@ -179,7 +222,6 @@ namespace exportbag {
     stream << outputDir_ << "/";
     stream << topicNames_.at(topic) << "/data/";
     stream << std::setfill('0') << std::setw(8) << count << ".pcd";
-    
     //timestamp
     std::ofstream timestamp;
     timestamp.open(outputDir_+"/"+topicNames_.at(topic)+"/timestamps.txt", std::ios_base::app);

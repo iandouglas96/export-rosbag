@@ -30,4 +30,4 @@ include_directories(
 
 add_executable(export_bag src/export_bag_node.cpp src/export_bag.cpp)
 add_dependencies(export_bag ${catkin_EXPORTED_TARGETS})
-target_link_libraries(export_bag ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES})
+target_link_libraries(export_bag ${catkin_LIBRARIES} ${OpenCV_LIBRARIES} ${PCL_LIBRARIES} yaml-cpp)
