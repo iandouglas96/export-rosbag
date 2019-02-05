@@ -1,7 +1,10 @@
 <launch>
+  <arg name="bag_file" default="/home/fla/bags/dam/day2/inspot_2018-08-02-13-11-19.bag"/>
+  <arg name="output_dir" default="/home/fla/tmp"/>
+  <arg name="cam_yaml"   default="/home/fla/bags/dam/processing/config/cameras.yaml"/>
   <node name="export_bag_node" type="export_bag" pkg="export_bag" output="screen">
-    <param name="bag_file" value="/media/ian/ResearchSSD/InspectionData/tunnel_datasets/CHD/tagslam_data/2018-08-01-15-27-11/tag_detections.bag"/> 
-    <param name="output_dir" value="/home/ian/tmp"/>
+    <param name="bag_file" value="$(arg bag_file)"/> 
+    <param name="output_dir" value="$(arg output_dir)"/>
     <param name="imu_topic" value="/mavros/imu/data"/>
     <param name="sync_images" value="true"/>
     <param name="sync_lidar_with_images" value="true"/>
@@ -9,7 +12,7 @@
     <param name="clahe_clip_limit" value="2.5"/>
     <param name="clahe_tile_count" value="8"/>
     <param name="rectify" value="true"/>
-    <param name="rectify_path" value="/home/ian/catkin_ws/src/inspection/apriltags/dam/current/config/cameras.yaml"/>
+    <param name="rectify_path" value="$(arg cam_yaml)"/>
     <rosparam param="image_topics">
       ["/quadruple/bottom_left/image_raw/compressed",
        "/quadruple/bottom_right/image_raw/compressed",

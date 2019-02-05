@@ -18,8 +18,8 @@ catkin_package(
   CATKIN_DEPENDS roscpp std_msgs
 )
 
-find_package(OpenCV 3.4 REQUIRED)
-find_package(PCL 1.8 REQUIRED)
+find_package(OpenCV 3.3 REQUIRED)
+find_package(PCL 1.7 REQUIRED)
 
 include_directories(
   include
